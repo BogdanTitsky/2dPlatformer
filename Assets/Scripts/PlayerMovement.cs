@@ -1,18 +1,18 @@
 using UnityEngine;
 
-public class Jumper : MonoBehaviour
+public class PlayerMovement : MonoBehaviour
 {
+    [SerializeField] private float speed;
+    [SerializeField] private float JumpForce;
+    [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private LayerMask wallLayer;
     private Rigidbody2D body;
     private Animator anim;
     private BoxCollider2D boxCollider;
     private float wallJumpCooldawn;
     private float horizontalInput;
-    [SerializeField] private LayerMask groundLayer;
-    [SerializeField] private LayerMask wallLayer;
 
-    [SerializeField] private float JumpForce;
 
-    
 
     void Start()
     {
@@ -24,10 +24,22 @@ public class Jumper : MonoBehaviour
     void Update()
     {
         horizontalInput = Input.GetAxis("Horizontal");
+
+
+        //Flip player when moving left-right
+        if (horizontalInput > 0.1f)
+            transform.localScale = Vector3.one;
+        else if (horizontalInput < -0.1f)
+            transform.localScale = new Vector3(-1, 1, 1);
+
+        //Set animator parameters
+        anim.SetBool("run", horizontalInput != 0);
         anim.SetBool("grounded", IsGrounded());
 
+        //Wall jump logic
         if (wallJumpCooldawn > 0.2f)
         {
+            body.velocity = new Vector2(horizontalInput * speed, body.velocity.y);
 
             if (onWall() && !IsGrounded())
             {
@@ -65,7 +77,7 @@ public class Jumper : MonoBehaviour
             }
             else
             {
-                body.velocity = new Vector2(-Mathf.Sign(transform.localPosition.x) * 3, 10);
+                body.velocity = new Vector2(-Mathf.Sign(transform.localPosition.x) * 2, 10);
             }
             wallJumpCooldawn = 0;
 
